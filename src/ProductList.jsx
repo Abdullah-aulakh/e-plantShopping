@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { addItem } from './CartSlice';
+
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
-    const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const [showPlants, setShowPlants] = useState(false);
+    const dispatch = useDispatch();
+    const cartItems = useSelector(state => state.cart.items);
 
     const plantsArray = [
         {
@@ -274,8 +279,31 @@ function ProductList({ onHomeClick }) {
             </div>
             {!showCart ? (
                 <div className="product-grid">
-
-
+                    {plantsArray.map((category, index) => (
+                        <div key={index} className="category-section">
+                            <h2 className="category-title">{category.category}</h2>
+                            <div className="category-plants">
+                                {category.plants.map((plant, plantIndex) => {
+                                    const isInCart = cartItems.some(item => item.name === plant.name);
+                                    return (
+                                        <div key={plantIndex} className="plant-card">
+                                            <img src={plant.image} alt={plant.name} className="plant-image" />
+                                            <h3>{plant.name}</h3>
+                                            <p className="price">{plant.cost}</p>
+                                            <p className="description">{plant.description}</p>
+                                            <button 
+                                                className={`add-to-cart-button ${isInCart ? 'disabled' : ''}`}
+                                                onClick={() => dispatch(addItem(plant))}
+                                                disabled={isInCart}
+                                            >
+                                                {isInCart ? 'In Cart' : 'Add to Cart'}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <CartItem onContinueShopping={handleContinueShopping} />
